@@ -26,13 +26,38 @@ class RoomSelectionDashboard extends Component {
 	constructor() {
 		super();
 		this.state = {
-			rooms: 0,
-			adults: 0,
+			rooms: 1,
+			adults: 1,
 			children: 0
 		};
 	}
 
+	enabledStatus = (element, type) => {
+		const { rooms, adults, children } = this.state;
+		if (element === "rooms") {
+			if(type === "increment") {
+				return rooms < 5;
+			} else {
+				return rooms > 1;
+			}
+		} else if(element === "adults") {
+			if(type === "increment") {
+				return (rooms * 4 > (adults + children));
+			} else {
+				return adults > 1	;
+			}
+		} else if(element === "children") {
+			if(type === "increment") {
+				return (rooms * 4 > (adults + children));
+			} else {
+				return children > 0;
+			}
+		}
+		return false;
+	}
+
 	render() {
+		const { rooms, adults, children } = this.state;
 		return(
 			<RoomSelectionContainer>
 				<span>
@@ -56,10 +81,35 @@ class RoomSelectionDashboard extends Component {
 										id={type.value}
 										icon={faMinusCircle}
 										onClick={(e) => {
-											let element = e.target.parentElement.id.toLowerCase();
-											this.setState({
-												[element]: this.state[element] - 1
-											});
+											let element = e.target.id !== "" ? e.target.id.toLowerCase() : e.target.parentElement.id.toLowerCase();
+											const canUpdateState = this.enabledStatus(element, "decrement");
+											if(canUpdateState) {
+												if(element === "rooms") {
+													if (((rooms-1) * 4) < (adults + children)) {
+														let newChildrenValue = children, newAdultValue = adults;
+														do {
+															if(newChildrenValue === 0) {
+																newAdultValue--;
+															} else {
+																newChildrenValue--;
+															}
+														} while(((rooms-1) * 4) < (newChildrenValue + newAdultValue));
+														this.setState({
+															[element]: this.state[element] - 1,
+															adults: newAdultValue,
+															children: newChildrenValue
+														});
+													} else {
+														this.setState({
+															[element]: this.state[element] - 1
+														});
+													}
+												} else {
+													this.setState({
+														[element]: this.state[element] - 1
+													});
+												}
+											}
 										}}
 									/>
 									<span>{this.state[type.key]}</span>	
@@ -67,10 +117,20 @@ class RoomSelectionDashboard extends Component {
 										icon={faPlusCircle} 
 										id={type.value}
 										onClick={(e) => {
-											let element = e.target.parentElement.id.toLowerCase();
-											this.setState({
-												[element]: this.state[element] + 1
-											});
+											let element = e.target.id !== "" ? e.target.id.toLowerCase() : e.target.parentElement.id.toLowerCase();
+											const canUpdateState = this.enabledStatus(element, "increment");
+											if(canUpdateState) {
+												if(element === "rooms") {
+													this.setState({
+														[element]: this.state[element] + 1,
+														"adults": this.state.adults + 1
+													});
+												} else {
+													this.setState({
+														[element]: this.state[element] + 1
+													});
+												}
+											}
 										}}
 									/>
 								</div>
