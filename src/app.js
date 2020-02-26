@@ -1,11 +1,15 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import validator from 'validator';
-import App from './containers/App.jsx';
+import { Provider } from 'react-redux';
+import { createStore } from 'redux';
+import AppRouter from './routers/AppRouter';
+import RoomStore from './reducers/reducers.js';
 
-console.log(validator.isEmail('test'));
+const store = createStore(RoomStore);
 
 ReactDOM.render(
-	<App/>, 
+	<Provider store={store}>
+		<AppRouter/>
+	</Provider>,
 	document.getElementById('app')
 );
